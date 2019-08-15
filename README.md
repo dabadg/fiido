@@ -62,6 +62,7 @@ para evitar el uso del acelerador y la funcionalidad de nivel zero, que permite
 el uso del acelerador en modo scooter.
 
 --------------------- NUEVO en la version 1.5.9.11 dabad ---------------------
+
 Añadida lectura de acelerador en caso de estar conectado al pin A0.
 
   Añadido nivel Zero, que anula la asistencia y permite utilizar el acelerador 
