@@ -44,9 +44,8 @@ no inciara el progresivo desde cero si no que el motor continuara a una velocida
 ligeramente inferior a la que ibamos, si se frena antes de los 10 segundos se
 anula la funcion y comenzara progresivo desde cero.
 
-    Ajustes en el algoritmo de aceleracion progresiva (mas suave) y en el modo 
+    Ajustes en el algoritmo de aceleracion progresiva (mas suave) y en el modo
 de aceleracion por pedaleo.
-
 -----------------------------------------------------------------------
    
    Opcionalmente puede incorporarse un zumbador piezoelectrico en el pin D11
@@ -541,7 +540,7 @@ void impresion_plotter() {
    //=============================================
 }
 
-// --- Tonos de SETUP
+// --- Tonos de SETUP (puedes ver ejemplos de los tonos en la carpeta 'doc/tonos error' del proyecto de github)
 // 1 tono - comienza inicialización
 // tono nivel zero - solo suena si se ha activado el novel zero o asistencia de arranque.
 // 3 tonos - termina inicialización
