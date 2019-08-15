@@ -87,11 +87,11 @@ Modificados los tonos de cambio de nivel.
 asistencia en cuestas desde variable de configuración.
 -----------------------------------------------------------------------------
 
-   Desarrollado por ciberus partiendo del programa incial de legalizacion del
-acelerador de Fulano, MIL GRACIAS por su ayuda :-) tambien gracias a David
-por su ayuda con las innumerables pruebas del programa, Dca por su croquis de
-conexiones con los cables de los conectores, Pablo y Fulano por los manuales y
-en general a todos los integrantes del grupo de desarrollo que sin su granito
+   Desarrollado por dabad partiendo de la versión de ciberus partiendo del 
+programa incial de legalizacion del acelerador de Fulano, MIL GRACIAS por su ayuda :-) 
+Tambien gracias a David por su ayuda con las innumerables pruebas del programa, Dca por 
+su croquis de conexiones con los cables de los conectores, Pablo y Fulano por los manuales y
+En general a todos los integrantes del grupo de desarrollo que sin su granito
 de arena no hubiera sido posible llegar hasta aqui.
 
 -----------------------------------------------------------------------------
