@@ -540,7 +540,7 @@ void impresion_plotter() {
    //=============================================
 }
 
-// --- Tonos de SETUP
+// --- Tonos de SETUP (puedes ver ejemplos de los tonos en la carpeta 'doc/tonos error' del proyecto de github)
 // 1 tono - comienza inicialización
 // tono nivel zero - solo suena si se ha activado el novel zero o asistencia de arranque.
 // 3 tonos - termina inicialización
