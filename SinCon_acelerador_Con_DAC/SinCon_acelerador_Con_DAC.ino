@@ -1,5 +1,5 @@
 /*
-                   Version SinCon acelerador y DAC 1.5.9.11
+                   Version SinCon acelerador y DAC 1.5.9.12
 
                     MODOS DE FUNCIONAMIENTO
                     
@@ -138,7 +138,7 @@ const float nivel_inicial_progresivo = 1.5;
 
 // Desacelera al parar los pedales, Poner en true para activar
 // o false para que no desacelere. Recomendable TRUE siempre.
-boolean desacelera_al_parar_pedal = true;
+const boolean desacelera_al_parar_pedal = true;
 
 // Activado modo acelerador manual en nivel 0
 boolean modo_acelerador_activo = true;
@@ -645,76 +645,86 @@ void setup() {
 }
 
 // Bucle principal
+unsigned long lastTime = millis();
+unsigned long interval = 250; //ms
+
 void loop() {
-  p_pulsos = 0;
-  p_frenadas = 0;
-  delay(tiempo_cadencia);
+
   pulsos = p_pulsos;
   frenadas = p_frenadas;
   
-  // Si se pedalea despacio o se paran los pedales
-  if (pulsos < cadencia) {
-      contador_retardo_inicio_progresivo++;
-      contador_retardo_paro_motor++;
-      if (contador_retardo_paro_motor > retardo_paro_motor){
-        para_motor();
-      }
-  }
-
-  // Si se pedalea normal (por encima de la cadencia).
-  if (pulsos >= cadencia) {
-      if (contador_retardo_inicio_progresivo < retardo_inicio_progresivo && auto_progresivo){
-        contador_retardo_aceleracion = bkp_contador_retardo_aceleracion;
-        auto_progresivo = false;
-        cadencia=2;
-      } else { 
-        auto_progresivo = false;  
-      }
-      contador_retardo_inicio_progresivo = 0;
-      contador_retardo_paro_motor = 0;
-      if (contador_retardo_aceleracion < retardo_aceleracion){
-        contador_retardo_aceleracion++;
-      }     
-      motor = -5;
-  }
-
-  // Si estan los pedales parados
-  if (pulsos == 0){
-    // Desacelera al parar los pedales
-    if (contador_retardo_aceleracion > 0 && desacelera_al_parar_pedal){
-      contador_retardo_aceleracion = contador_retardo_aceleracion - 2;
-      if (contador_retardo_aceleracion < 0){
+  if(millis() - lastTime >= interval){
+    
+    p_pulsos = 0;
+    p_frenadas = 0;
+    
+    // Si se pedalea despacio o se paran los pedales
+    if (pulsos < cadencia) {
+        contador_retardo_inicio_progresivo++;
+        contador_retardo_paro_motor++;
+        if (contador_retardo_paro_motor > retardo_paro_motor){
+          para_motor();
+        }
+    }
+  
+    // Si se pedalea normal (por encima de la cadencia).
+    if (pulsos >= cadencia) {
+        if (contador_retardo_inicio_progresivo < retardo_inicio_progresivo && auto_progresivo){
+          contador_retardo_aceleracion = bkp_contador_retardo_aceleracion;
+          auto_progresivo = false;
+          cadencia=2;
+        } else { 
+          auto_progresivo = false;  
+        }
+        contador_retardo_inicio_progresivo = 0;
+        contador_retardo_paro_motor = 0;
+        if (contador_retardo_aceleracion < retardo_aceleracion){
+          contador_retardo_aceleracion++;
+        }     
+        motor = -5;
+    }
+  
+    // Si estan los pedales parados
+    if (pulsos == 0){
+      // Desacelera al parar los pedales
+      if (contador_retardo_aceleracion > 0 && desacelera_al_parar_pedal){
+        contador_retardo_aceleracion = contador_retardo_aceleracion - 2;
+        if (contador_retardo_aceleracion < 0){
+          contador_retardo_aceleracion = 0;
+        }
+      }   
+    }
+  
+    // Si se ha pulsado el freno
+    if (frenadas > 0) {  
+      // Modo 1 sube nivel de asistencia con un toque y baja con 2 toques seguidos
+      if (modo_crucero == 1 && pulsos > 3 && contador_retardo_aceleracion != 0){
+        cambia_nivel();
+      // Salidas en cuesta 4 toques de freno consecutivos si estamos parados (el primero no suena)
+      } else if (nivel_aceleracion == voltaje_minimo && contador_retardo_aceleracion == 0
+        && contador_retardo_paro_motor >= retardo_paro_motor && ayuda_salida_cuesta){
+        ayuda_arranque();
+      // Para motor al frenar
+      } else {
+        motor = -8;
         contador_retardo_aceleracion = 0;
+        aviso = false;
       }
-    }   
-  }
-
-  // Si se ha pulsado el freno
-  if (frenadas > 0) {  
-    // Modo 1 sube nivel de asistencia con un toque y baja con 2 toques seguidos
-    if (modo_crucero == 1 && pulsos > 3 && contador_retardo_aceleracion != 0){
-      cambia_nivel();
-    // Salidas en cuesta 4 toques de freno consecutivos si estamos parados (el primero no suena)
-    } else if (nivel_aceleracion == voltaje_minimo && contador_retardo_aceleracion == 0
-      && contador_retardo_paro_motor >= retardo_paro_motor && ayuda_salida_cuesta){
-      ayuda_arranque();
-    // Para motor al frenar
-    } else {
-      motor = -8;
-      contador_retardo_aceleracion = 0;
-      aviso = false;
     }
-  }
-
-  // Aviso de final de progresivo, configurar arriba si no se desea
-  if (tono_fin_progresivo){
-    if (contador_retardo_aceleracion == retardo_aceleracion && !aviso) {
-      repeatTones(true, 1, 2900, 500, 0); // Tono de Final de progresivo
-      aviso = true;
-    }
-  }
   
+    // Aviso de final de progresivo, configurar arriba si no se desea
+    if (tono_fin_progresivo){
+      if (contador_retardo_aceleracion == retardo_aceleracion && !aviso) {
+        repeatTones(true, 1, 2900, 500, 0); // Tono de Final de progresivo
+        aviso = true;
+      }
+    }
+        
+    if (debug) {impresion_plotter();}
+  
+    lastTime = millis(); 
+  }
+
   establece_voltaje();
-  
-  if (debug) {impresion_plotter();}
+
 }

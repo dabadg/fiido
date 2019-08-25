@@ -1,0 +1,16 @@
+Encendemos el contacto y empieza la inicialización.
+
+Si el acelerador no se encuentra o da lectura erronea y se encuentra activo en la configuración, se emite un tono SOS y desactiva el acelerador. 
+(Con esto evitamos errores si se nos rompe el sensor del acelerador o si se produce algún error en cableado).
+
+Tras la comprobación del acelerador, se emitirá un tono de inicialización (1 tono agudo).
+
+Si arrancamos con el freno pulsado, activamos la ayuda al arranque y el nivel ZERO.
+emitiendo un tono ZERO que avisará de que está activa la ayuda.
+
+Después del tono de inicialización y del tono ZERO si se ha seleccionado, tenemos 3 segundos para poder cambiar entre los modos de asistencia. 
+Por defecto estará en el modo de asistencia por niveles modo 1. Para cambiar al modo de asistencia por pedaleo modo 2, hay que dar más de 4 toques de freno.
+
+Como último paso se emitirá el tono inicialización completada(3 tonos agudos) y seguido sonará un tono que indicará el modo en el que nos encontramos (1 o 2)
+
+*** los tonos ZERO y SOS, son tonos de mensaje en morse.
