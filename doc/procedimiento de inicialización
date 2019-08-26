@@ -1,3 +1,5 @@
+Inicialización:
+
 Encendemos el contacto y empieza la inicialización.
 
 Si el acelerador no se encuentra o da lectura erronea y se encuentra activo en la configuración, se emite un tono SOS y desactiva el acelerador. 
@@ -14,3 +16,13 @@ Por defecto estará en el modo de asistencia por niveles modo 1. Para cambiar al
 Como último paso se emitirá el tono inicialización completada(3 tonos agudos) y seguido sonará un tono que indicará el modo en el que nos encontramos (1 o 2)
 
 *** los tonos ZERO y SOS, son tonos de mensaje en morse.
+
+Uso:
+
+Para cambiar de nivel, un toque sube de nivel, dos toques baja de nivel.
+
+Si se encuentra activo el acceso a nivel ZERO, se podrá utilizar bajando de nivel hasta el ZERO. 
+Una vez dentro del nivel ZERO, los toques de freno no realizarán cambio de niveles. Desde este momento solo funcionará el acelerador.
+
+Si se quiere salir del nivel ZERO, el procedimiento es el siguiente. 
+Mantener el freno pulsado, no pedalear y hacer un cambio brusco de acelerador desde el nivel máximo hasta el nivel mínimo.
