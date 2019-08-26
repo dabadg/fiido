@@ -389,7 +389,7 @@ void establece_voltaje(){
     valor = (4096 / 5) * nivel_aceleracion;
     
   } else { // Calcula el valor del DAC por medio del algoritmo autoprogresivo
-    float incremento = ((v_crucero+0.3) - nivel_inicial_progresivo) / retardo_aceleracion;
+    float incremento = ((v_crucero + 0.3) - nivel_inicial_progresivo) / retardo_aceleracion;
     
     nivel_aceleracion = nivel_inicial_progresivo + (incremento * contador_retardo_aceleracion);
     
@@ -411,12 +411,12 @@ void establece_voltaje(){
    
     // Con la medida del acelerador detectamos si hay que salir del nivel Zero
     // Sale del nivel Zero si se está apretado el freno, no hay pedaladas, nos encontramos en nivel Zero y se ha detectado el corte repentino de acelerador.
-    if(digitalRead(pin_freno) == LOW && pulsos == 0 && nivel==NIVEL_ZERO && (v_aceleradorprev > v_acelerador &&  v_acelerador <= a0_min_value+50.0 && v_aceleradorprev > a0_med_value-50.0)){ 
-      nivel=nivel_por_defecto;
+    if(digitalRead(pin_freno) == LOW && pulsos == 0 && nivel==NIVEL_ZERO && (v_aceleradorprev > v_acelerador &&  v_acelerador <= a0_min_value + 50.0 && v_aceleradorprev > a0_med_value - 50.0)){ 
+      nivel = nivel_por_defecto;
       v_crucero = niveles[nivel];
       repeatTones(tonos_cambia_nivel,1,1800,800,0);
     } 
-    v_aceleradorprev=v_acelerador; // Almacena el valor de la medida anterior del acelerador para commparar los cambios bruscos y detectar la salida de nivel zero..  
+    v_aceleradorprev = v_acelerador; // Almacena el valor de la medida anterior del acelerador para commparar los cambios bruscos y detectar la salida de nivel zero..  
      
     // Si no se está pedaleando se anula potencia del acelerador
     if(pulsos == 0){
@@ -440,10 +440,10 @@ void establece_voltaje(){
     float c_acelerador;
     // Leemos nivel de acelerador
     c_acelerador=v_acelerador;
-    for (int f=1; f <= 30 ; f++){
-      c_acelerador=c_acelerador+analogRead(pin_acelerador); // Tomamos 30 medidas para calcular la media.   
+    for (int f = 1; f <= 30 ; f++){
+      c_acelerador = c_acelerador + analogRead(pin_acelerador); // Tomamos 30 medidas para calcular la media.   
     }
-    return c_acelerador/30;
+    return c_acelerador / 30;
   }
   
   void nivelaAcelerador(){
@@ -541,8 +541,9 @@ void impresion_plotter() {
 }
 
 // --- Tonos de SETUP (puedes ver ejemplos de los tonos en la carpeta 'doc/tonos error' del proyecto de github)
+// Tono SOS de error de lectura de acelerador. Si se produce error en lectura de acelerador, se emite el aviso y se bloquea el uso del mismo.
 // 1 tono - comienza inicialización
-// tono nivel zero - solo suena si se ha activado el novel zero o asistencia de arranque.
+// Tono nivel ZERO - solo suena si se ha activado el nivel zero o asistencia de arranque.
 // 3 tonos - termina inicialización
 // [1,2] tonos - confirma el modo seleccionado
 
