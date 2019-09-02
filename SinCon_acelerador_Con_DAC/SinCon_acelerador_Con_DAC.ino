@@ -164,8 +164,8 @@ const float niveles[] = {0.85, 2.0 , 2.40 , 2.80 , 3.20 , 3.90}; // saltos de 0.
 // Aprox 0.20 son saltos de 2,5kmh , 0.25 de 3kmh, 0.35 de 4kmh ,0.40 de 5kmh
 
 // Constantes de control de valor de acelerador; 
-// Valores mínimos y mávimos leidos por el pin A0
-float a0_min_value = 190.0;
+// Valores mínimos y máximos leidos por el pin A0
+float a0_min_value = 190.0; // Valor por defecto, al inicializar, lee el valor real del acelerador.
 const float a0_6km_value = 450.0;
 const float a0_med_value = 550.0;
 const float a0_max_value = 847.0;
@@ -302,6 +302,13 @@ void ZERO_TONE(){
   nota(b[2],100);delay(300);
 }
 
+void ZERO_NTONE(){
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+}
 void repeatTones(boolean trigger, int steps, int frequency, int duration, int delayTime){
   if(trigger){
     int cont=steps;
@@ -599,7 +606,7 @@ void setup() {
     if (modo_acelerador_activo){
       acelerador_nivel_zero_activo=true;
       nivel_minimo = NIVEL_ZERO;
-      ZERO_TONE();
+      ZERO_NTONE();
     }
   }
 
