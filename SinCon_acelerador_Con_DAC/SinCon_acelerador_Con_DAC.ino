@@ -166,6 +166,7 @@ const float niveles[] = {0.85, 2.0 , 2.40 , 2.80 , 3.20 , 3.90}; // saltos de 0.
 // Constantes de control de valor de acelerador; 
 // Valores mínimos y mávimos leidos por el pin A0
 float a0_min_value = 190.0;
+const float a0_6km_value = 450.0;
 const float a0_med_value = 550.0;
 const float a0_max_value = 847.0;
 
@@ -411,25 +412,21 @@ void establece_voltaje(){
    
     // Con la medida del acelerador detectamos si hay que salir del nivel Zero
     // Sale del nivel Zero si se está apretado el freno, no hay pedaladas, nos encontramos en nivel Zero y se ha detectado el corte repentino de acelerador.
-    if(digitalRead(pin_freno) == LOW && pulsos == 0 && nivel==NIVEL_ZERO && (v_aceleradorprev > v_acelerador &&  v_acelerador <= a0_min_value+50.0 && v_aceleradorprev > a0_med_value-50.0)){ 
+    if(digitalRead(pin_freno) == LOW && pulsos == 0 && nivel==NIVEL_ZERO && (v_aceleradorprev > v_acelerador &&  v_acelerador <= a0_min_value + 50.0 && v_aceleradorprev > a0_med_value - 50.0)){ 
       nivel=nivel_por_defecto;
       v_crucero = niveles[nivel];
       repeatTones(tonos_cambia_nivel,1,1800,800,0);
     } 
     v_aceleradorprev=v_acelerador; // Almacena el valor de la medida anterior del acelerador para commparar los cambios bruscos y detectar la salida de nivel zero..  
      
-    // Si no se está pedaleando se anula potencia del acelerador
-    if(pulsos == 0){
+  
+    
+    // Si no se pedalea y se acelera, se aplica una potencia de referencia;
+    if (nivel==NIVEL_ZERO && pulsos == 0 && v_acelerador > a0_min_value - 20) { 
+      v_acelerador = v_acelerador <= a0_6km_value?v_acelerador:a0_6km_value;
+    } else if (pulsos == 0) { // Si no se está pedaleando se anula potencia del acelerador
       v_acelerador = a0_min_value;
     }
-  
-    /*
-    // Si no se pedalea y se acelera, se aplica una potencia de referencia;
-    if(pulsos == 0 && v_acelerador > a0_min_value - 20){ 
-      float vf_acelerador = a0_med_value;
-      v_acelerador = v_acelerador < vf_acelerador?v_acelerador:vf_acelerador;
-    }
-    */
   
     // Evita que los valores leidos se salgan del rango.
     nivelaAcelerador();
