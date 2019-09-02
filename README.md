@@ -89,6 +89,13 @@ Modificados los tonos de cambio de nivel.
 asistencia en cuestas desde variable de configuración.
 -----------------------------------------------------------------------------
 
+--------------------------------- 1.5.9.13 dabad ----------------------------
+Corrección de error detectado en control de acelerador sin pedalear.
+Activado nivel 0 por defecto al arrancar con el freno pulsado. En caso de no activar 
+el nivel ZERO y la asistencia en cuestas, el sistema arrancará en el nivel 2 sin opción de 
+utilizar el acelerador en ningún momento.
+
+-----------------------------------------------------------------------------
    Desarrollado por dabad partiendo de la versión de ciberus partiendo del programa incial de legalizacion del
 acelerador de Fulano, MIL GRACIAS por su ayuda :-) tambien gracias a David
 por su ayuda con las innumerables pruebas del programa, Dca por su croquis de
