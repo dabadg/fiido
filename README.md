@@ -1,6 +1,6 @@
 # fiido
 /*
-                   Version SinCon acelerador 1.5.9.11
+                   Version SinCon acelerador 1.5.9.13
 
                     MODOS DE FUNCIONAMIENTO
                     
