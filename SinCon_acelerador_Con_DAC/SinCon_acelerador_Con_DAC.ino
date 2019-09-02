@@ -341,7 +341,7 @@ void ayuda_arranque(){
     int contr = toques_salida_cuesta;
     int arranque_ca = 0;
     p_frenadas = 0;
-    delay(350);
+    delay(150);
     
     while(contr -- > 0){
       if (p_frenadas > 0){
@@ -394,8 +394,6 @@ void establece_voltaje(){
       nivel_aceleracion = voltaje_maximo;
     }
     
-    valor = (4096 / 5) * nivel_aceleracion;
-    
   } else { // Calcula el valor del DAC por medio del algoritmo autoprogresivo
     float incremento = ((v_crucero+0.3) - nivel_inicial_progresivo) / retardo_aceleracion;
     
@@ -406,10 +404,11 @@ void establece_voltaje(){
     } else if (nivel_aceleracion > v_crucero){
       nivel_aceleracion = v_crucero;
     }
-    
-    valor = (4096 / 5) * nivel_aceleracion;
   }
+
+  valor = (4096 / 5) * nivel_aceleracion;
   dac.setVoltage(valor,false); // fija voltaje en DAC                               
+
 }
 
   void leer_Acelerador(){
@@ -428,8 +427,8 @@ void establece_voltaje(){
      
   
     
-    // Si no se pedalea y se acelera, se aplica una potencia de referencia;
-    if (nivel==NIVEL_ZERO && pulsos == 0 && v_acelerador > a0_min_value - 20) { 
+    // Si no se pedalea y se acelera, se aplica una potencia de referencia 6km/h;
+    if (nivel==NIVEL_ZERO && pulsos == 0 && v_acelerador > a0_min_value + 20) { 
       v_acelerador = v_acelerador <= a0_6km_value?v_acelerador:a0_6km_value;
     } else if (pulsos == 0) { // Si no se está pedaleando se anula potencia del acelerador
       v_acelerador = a0_min_value;
@@ -605,6 +604,7 @@ void setup() {
     // Activamos el nivel ZERO si el acelerador está activo
     if (modo_acelerador_activo){
       acelerador_nivel_zero_activo=true;
+      nivel = NIVEL_ZERO;
       nivel_minimo = NIVEL_ZERO;
       ZERO_NTONE();
     }
