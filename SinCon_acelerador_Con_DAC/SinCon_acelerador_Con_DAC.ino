@@ -59,9 +59,7 @@ boolean modo_acelerador_activo = true;
 
 // Tipo por defecto de funcionamiento: 
 // 1 = Crucero (nuevo por niveles) sube con un toque y baja con 2 toques,
-// 2 = Velocidad por movimiento de pedales [No tiene crucero]), tambien se pueden
-// elegir o cambiar con 5-6 toques o mas de freno al encender la bici.
-int modo_crucero = 1; // Valores = 1 y 2 ...
+int modo_crucero = 1;
 
 // Configuracion de los pitidos del zumbador piezoelectrico
 const boolean tono_inicial = true;          // Al encender la bici y confirmacion de modos de funcionamiento
@@ -537,16 +535,17 @@ void setup() {
         // Modo 2, al pedalear aumenta velocidad y al parar pedales disminuye
         // Activar con mas de 4 toques de freno tras oir el pitido o encender la bici.
         modo_crucero = 2;
+        /*
         retardo_aceleracion = 6;
         retardo_paro_motor = 1.25;
         desacelera_al_parar_pedal = true;
         p_frenadas = 0;
+        */
         break;
       } else if (mdcont==0){
         v_crucero = niveles[nivel];// Fijamos el nivel seleccionado al encender la bici si aranca en modo 1
       }
     }
-    //repeatTones(tono_inicial, modo_crucero, 3000, 100, 150); // Tono verificacion inicialización de modo x
 
   // Ajusta contadores de tiempo de la configuracion 
   retardo_paro_motor = retardo_paro_motor * (1000 / tiempo_cadencia);
@@ -556,7 +555,6 @@ void setup() {
   // Anulamos el retardo por seguridad para que empiece progresivo al encender la bici
   contador_retardo_inicio_progresivo = retardo_inicio_progresivo;
 
-  //delay(300);
   repeatTones(tono_inicial, 3, 3000, 90, 90); // Tono de finalización de setup.
   delay(100);
   repeatTones(tono_inicial, modo_crucero, 2500, 90, 150); // Tono verificacion inicialización de modo x.
@@ -577,27 +575,25 @@ void loop() {
       if (contador_retardo_paro_motor > retardo_paro_motor){
         para_motor();
       }
-  }
+  
 
   // Si se pedalea normal (por encima de la cadencia).
-  if (pulsos >= cadencia) {
+  } else if (pulsos >= cadencia) {
       if (contador_retardo_inicio_progresivo < retardo_inicio_progresivo && auto_progresivo){
         contador_retardo_aceleracion = bkp_contador_retardo_aceleracion;
-        auto_progresivo = false;
         cadencia=2;
-      } else { 
-        auto_progresivo = false;  
       }
+      auto_progresivo = false; 
       contador_retardo_inicio_progresivo = 0;
       contador_retardo_paro_motor = 0;
+
       if (contador_retardo_aceleracion < retardo_aceleracion){
         contador_retardo_aceleracion++;
       }     
       motor = -5;
-  }
 
   // Si estan los pedales parados
-  if (pulsos == 0){
+  } else if (pulsos == 0){
     // Desacelera al parar los pedales
     if (contador_retardo_aceleracion > 0 && desacelera_al_parar_pedal){
       contador_retardo_aceleracion = contador_retardo_aceleracion - 2;
@@ -610,7 +606,7 @@ void loop() {
   // Si se ha pulsado el freno
   if (frenadas > 0) {  
     // Modo 1 sube nivel de asistencia con un toque y baja con 2 toques seguidos
-    if (modo_crucero == 1 && pulsos > 3 && contador_retardo_aceleracion != 0){
+    if (pulsos > 3 && contador_retardo_aceleracion != 0){
       cambia_nivel();
     // Salidas en cuesta 4 toques de freno consecutivos si estamos parados (el primero no suena)
     } else if (nivel_aceleracion == voltaje_minimo && contador_retardo_aceleracion == 0
