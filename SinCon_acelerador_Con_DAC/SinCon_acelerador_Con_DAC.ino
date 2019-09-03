@@ -1,98 +1,12 @@
 /*
-                   Version SinCon acelerador y DAC 1.5.9.12
+                   Version SinCon acelerador 1.5.9.15
 
-                    MODOS DE FUNCIONAMIENTO
-                    
------------------------------------------------------------------------
-
-       --- MODO 1 - Por Niveles ---
-
-   En el nuevo modo alternativo (1) la velocidad de crucero se puede ir
-aumentando o disminuyendo, con un toque de freno se aumenta y con dos
-seguidos se disminuye el nivel o limite de velocidad siempre que se
-esten moviendo los pedales.
-
-    Se pueden configurar la cantidad de niveles que queramos y los
- voltajes/velocidad de cada uno segun los gustos en la lista Niveles.
-
------------------------------------------------------------------------
-
-       --- MODO 2 - Velocidad por pedaleo ---
-
-   En este modo no hay crucero o limite de velocidad, se puede regular
-la velocidad a la que queremos ir parando los pedales (dismminuye)
-o pedaleando muy despacio (mantiene) la velocidad.
-
-   Este modo se puede acceder a el dando mas de 7 toques de freno
-seguidos al encender la bici o tras oir el beep inicial.
-
---------------------- NUEVO desde la version 1.4 ---------------------
-
-  Incorporado sistema de ayuda al arranque para la salida cuesta arriba
-o semaforos, estando parado damos cuatro toques de freno seguidos (maximo 1/3
-de segundo entre toques) y hara un progresivo de un corto tiempo que si le
-acompanyamos de pedal saldremos sin esfuerzo, en caso de que se activara por
-error con otro toque mas de freno se pararia y se anula la ayuda.
-   Este sistema esta desactivado por defecto, para activarlo hay que encender
-la bicicleta con cualquiera de los dos manetas de frenos apretadas.
-
---------------------- NUEVO desde la version 1.5 ---------------------
-
-   Nueva funcion auto-progresivo, si se deja de pedalear el motor se para como
-de costumbre, pero si continuamos pedaleando antes de transcurridos 10 segundos
-no inciara el progresivo desde cero si no que el motor continuara a una velocidad
-ligeramente inferior a la que ibamos, si se frena antes de los 10 segundos se
-anula la funcion y comenzara progresivo desde cero.
-
-    Ajustes en el algoritmo de aceleracion progresiva (mas suave) y en el modo
-de aceleracion por pedaleo.
------------------------------------------------------------------------
-   
-   Opcionalmente puede incorporarse un zumbador piezoelectrico en el pin D11
-y GND y sonara al subir o bajar nivel, seleccion de modos, ayuda salida en cuesta 
-y alcanzar el final del progresivo...
-
- -----------------------------------------------------------------------
- 
-   El acelerador no haria falta conectarle, se puede desmontar o bloquear. Si no 
-se quiere utilizar hay que dejar la variable modo_acelerador_activo a false
-
-para evitar el uso del acelerador y la funcionalidad de nivel zero, que permite 
-el uso del acelerador en modo scooter.
-
---------------------- NUEVO en la version 1.5.9.11 dabad ---------------------
-Añadida lectura de acelerador en caso de estar conectado al pin A0.
-
-  Añadido nivel Zero, que anula la asistencia y permite utilizar el acelerador 
-manualmente. Este modo solo puede ser activado si la variable 
-modo_acelerador_activo está a true, y se ha activado en el arranque 
-la opción de acelerador en nivel zero.
-Esta funcionalidad se activa al arranque dejando pulsado el freno y se activa 
-junto con la operación  de activación con la asistencia en cuestas. 
-El acelerador entregará la potencia deseada  mientras se esté pedaleando.
-
-  Se ha añadido un control de cambio de nivel, para que no se pueda salir 
-del Zero hasta no haber ejecutado el comando de salida. 
-Este caso es para evitar salir del nivel Zero por error al pulsar el freno mientras se pedalea.
-Para salir del nivel Zero, sin pedalear hay que mantener el acelerador en una posición 
-alta y hacer un cambio brusco para bajar la velocidad al mínimo. Esto nos llevará 
-directamente al nivel 2 de asistencia.
- 
-  Modificada la asistencia de cuestas para permitir realizar los tres pulsos y dejar
-el freno pulsado a la espera de soltarlo y entregar la potencia.
- 
-Modificados los tonos de cambio de nivel.
-
-  Añadida posibilidad de incrementar los pulsos necesarios para entrar en modo 
-asistencia en cuestas desde variable de configuración.
 -----------------------------------------------------------------------------
 
-   Desarrollado por dabad partiendo de la versión de ciberus partiendo del 
-programa incial de legalizacion del acelerador de Fulano, MIL GRACIAS por su ayuda :-) 
-Tambien gracias a David por su ayuda con las innumerables pruebas del programa, Dca por 
-su croquis de conexiones con los cables de los conectores, Pablo y Fulano por los manuales y
-En general a todos los integrantes del grupo de desarrollo que sin su granito
-de arena no hubiera sido posible llegar hasta aqui.
+   Versión que mezcla la funcionalidad de la versión sin acelerador y la versión 
+con acelerador y que permite cargarla en tu arduino tanto llevando instalado el 
+acelerador como sin el.
+Desarrollada por dabad partiendo de las versiones de ciberus y fulano.
 
 -----------------------------------------------------------------------------
 
@@ -138,16 +52,14 @@ const float nivel_inicial_progresivo = 1.5;
 
 // Desacelera al parar los pedales, Poner en true para activar
 // o false para que no desacelere. Recomendable TRUE siempre.
-const boolean desacelera_al_parar_pedal = true;
+boolean desacelera_al_parar_pedal = true;
 
 // Activado modo acelerador manual en nivel 0
 boolean modo_acelerador_activo = true;
 
 // Tipo por defecto de funcionamiento: 
 // 1 = Crucero (nuevo por niveles) sube con un toque y baja con 2 toques,
-// 2 = Velocidad por movimiento de pedales [No tiene crucero]), tambien se pueden
-// elegir o cambiar con 5-6 toques o mas de freno al encender la bici.
-int modo_crucero = 1; // Valores = 1 y 2 ...
+int modo_crucero = 1;
 
 // Configuracion de los pitidos del zumbador piezoelectrico
 const boolean tono_inicial = true;          // Al encender la bici y confirmacion de modos de funcionamiento
@@ -164,8 +76,9 @@ const float niveles[] = {0.85, 2.0 , 2.40 , 2.80 , 3.20 , 3.90}; // saltos de 0.
 // Aprox 0.20 son saltos de 2,5kmh , 0.25 de 3kmh, 0.35 de 4kmh ,0.40 de 5kmh
 
 // Constantes de control de valor de acelerador; 
-// Valores mínimos y mávimos leidos por el pin A0
-float a0_min_value = 190.0;
+// Valores mínimos y máximos leidos por el pin A0
+float a0_min_value = 190.0; // Valor por defecto, al inicializar, lee el valor real del acelerador.
+const float a0_6km_value = 450.0;
 const float a0_med_value = 550.0;
 const float a0_max_value = 847.0;
 
@@ -301,6 +214,13 @@ void ZERO_TONE(){
   nota(b[2],100);delay(300);
 }
 
+void ZERO_NTONE(){
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+  nota(b[2],100);delay(40);
+}
 void repeatTones(boolean trigger, int steps, int frequency, int duration, int delayTime){
   if(trigger){
     int cont=steps;
@@ -333,7 +253,7 @@ void ayuda_arranque(){
     int contr = toques_salida_cuesta;
     int arranque_ca = 0;
     p_frenadas = 0;
-    delay(350);
+    delay(150);
     
     while(contr -- > 0){
       if (p_frenadas > 0){
@@ -377,7 +297,7 @@ void establece_voltaje(){
   uint32_t valor;
   if (nivel <= NIVEL_ZERO && acelerador_nivel_zero_activo  && modo_acelerador_activo) { // Calcula el valor del DAC por medio del acelerador
     
-    leer_Acelerador();
+    v_acelerador = calculaAcelerador();
     nivel_aceleracion = v_acelerador * 5 / 1023;
     
     if (nivel_aceleracion < voltaje_minimo){
@@ -386,10 +306,8 @@ void establece_voltaje(){
       nivel_aceleracion = voltaje_maximo;
     }
     
-    valor = (4096 / 5) * nivel_aceleracion;
-    
   } else { // Calcula el valor del DAC por medio del algoritmo autoprogresivo
-    float incremento = ((v_crucero + 0.3) - nivel_inicial_progresivo) / retardo_aceleracion;
+    float incremento = ((v_crucero+0.3) - nivel_inicial_progresivo) / retardo_aceleracion;
     
     nivel_aceleracion = nivel_inicial_progresivo + (incremento * contador_retardo_aceleracion);
     
@@ -398,62 +316,47 @@ void establece_voltaje(){
     } else if (nivel_aceleracion > v_crucero){
       nivel_aceleracion = v_crucero;
     }
-    
-    valor = (4096 / 5) * nivel_aceleracion;
   }
+
+  valor = (4096 / 5) * nivel_aceleracion;
   dac.setVoltage(valor,false); // fija voltaje en DAC                               
+
 }
 
-  void leer_Acelerador(){
+  float calculaAcelerador(){
     
-    // Tomamos multiples lecturas del acelerador para obtener su valor
-    v_acelerador = capturaLecturaAcelerador();
-   
-    // Con la medida del acelerador detectamos si hay que salir del nivel Zero
-    // Sale del nivel Zero si se está apretado el freno, no hay pedaladas, nos encontramos en nivel Zero y se ha detectado el corte repentino de acelerador.
-    if(digitalRead(pin_freno) == LOW && pulsos == 0 && nivel==NIVEL_ZERO && (v_aceleradorprev > v_acelerador &&  v_acelerador <= a0_min_value + 50.0 && v_aceleradorprev > a0_med_value - 50.0)){ 
-      nivel = nivel_por_defecto;
-      v_crucero = niveles[nivel];
-      repeatTones(tonos_cambia_nivel,1,1800,800,0);
-    } 
-    v_aceleradorprev = v_acelerador; // Almacena el valor de la medida anterior del acelerador para commparar los cambios bruscos y detectar la salida de nivel zero..  
-     
-    // Si no se está pedaleando se anula potencia del acelerador
-    if(pulsos == 0){
-      v_acelerador = a0_min_value;
+    // Tomamos multiples lecturas del acelerador para obtener su valor.
+    float c_acelerador = capturaLecturaAcelerador();
+       
+    // Si no se pedalea y se acelera, se aplica una potencia de referencia 6km/h;
+    if (nivel==NIVEL_ZERO && pulsos == 0 && c_acelerador > a0_min_value + 20) {
+      c_acelerador = c_acelerador <= a0_6km_value?c_acelerador:a0_6km_value;
+    } else if (pulsos == 0) { // Si no se está pedaleando se anula potencia del acelerador
+      c_acelerador = a0_min_value;
     }
-  
-    /*
-    // Si no se pedalea y se acelera, se aplica una potencia de referencia;
-    if(pulsos == 0 && v_acelerador > a0_min_value - 20){ 
-      float vf_acelerador = a0_med_value;
-      v_acelerador = v_acelerador < vf_acelerador?v_acelerador:vf_acelerador;
-    }
-    */
-  
-    // Evita que los valores leidos se salgan del rango.
-    nivelaAcelerador();
-  
+
+    return c_acelerador;
   }
 
-  float capturaLecturaAcelerador(){
-    float c_acelerador;
-    // Leemos nivel de acelerador
-    c_acelerador=v_acelerador;
-    for (int f = 1; f <= 30 ; f++){
-      c_acelerador = c_acelerador + analogRead(pin_acelerador); // Tomamos 30 medidas para calcular la media.   
+    float capturaLecturaAcelerador(){
+      float cl_acelerador = 0;
+      // Leemos nivel de acelerador
+      for (int f=0; f <= 30 ; f++){
+        cl_acelerador = cl_acelerador + analogRead(pin_acelerador); // Tomamos 30 medidas para calcular la media.
+      }
+      cl_acelerador = cl_acelerador / 30;
+      return nivelaAcelerador(cl_acelerador);
     }
-    return c_acelerador / 30;
-  }
-  
-  void nivelaAcelerador(){
-    // nivelamos los valores para que no salgan del rango de máximo/mínimo.
-    if(v_acelerador <= a0_min_value) {
-      v_acelerador = a0_min_value;
-    }else if(v_acelerador >= a0_max_value) {
-      v_acelerador = a0_max_value;
-    }  
-  }
+    
+      float nivelaAcelerador(float &n_acelerador){
+        // nivelamos los valores para que no salgan del rango de máximo/mínimo.
+        if (n_acelerador <= a0_min_value) {
+          n_acelerador = a0_min_value;
+        } else if (n_acelerador >= a0_max_value) {
+          n_acelerador = a0_max_value;
+        }
+        return n_acelerador;
+      }
 
 void para_motor(){
   motor = -8;
@@ -473,12 +376,12 @@ void cambia_nivel(){
       int detector_direccion=0;
     
       // Almacena los pulsos de freno para detectar la dirección (0 Sube, >1 Baja)
-      delay(50); // Espera 50ms para iniciar la detección del segundo pulso.
+      delay(20); // Espera 10ms para iniciar la detección del segundo pulso evitando el debounce.
       p_frenadas = 0;
     
-      int lvcont=45;
+      int lvcont=450;
       while (lvcont-- > 0){ // Escaneamos durante 450ms una segunda pulsación para detectar la bajada de nivel (45 vueltas de 10ms)
-        delay(10);
+        delay(1);
         if (p_frenadas > 0) {
          p_frenadas = 0;
          detector_direccion++;
@@ -489,24 +392,24 @@ void cambia_nivel(){
       if (detector_direccion > 0) { // Baja Nivel
         nivel--;
         if (nivel <= nivel_minimo) {
-          delay(90);
-          repeatTones(tonos_cambia_nivel, 2, 1800, 300, 50); // Tono largo nivel mínimo.
           nivel = nivel_minimo;
+          //delay(10);
+          repeatTones(tonos_cambia_nivel, 2, 1800, 300, 50); // Tono largo nivel mínimo.
         } else {
           repeatTones(tonos_cambia_nivel, 1, 1800, 60, 0); // Segundo tono (baja de nivel)      
         }   
       } else { // Sube Nivel
         nivel++;
         if (nivel >= num_niveles) {
-          repeatTones(tonos_cambia_nivel, 2, 2200, 300, 50); //Tono largo nivel maximo.
           nivel = num_niveles;
+          repeatTones(tonos_cambia_nivel, 2, 2200, 300, 50); //Tono largo nivel maximo.
         } else {
             repeatTones(tonos_cambia_nivel, 1, 2200, 60, 0); // Primer tono (sube de nivel)    
         }
       }
       
       v_crucero = niveles[nivel];
-      delay(200);
+      delay(50); // para eliminar el debounce
     }
     p_frenadas = 0;
 }
@@ -541,9 +444,8 @@ void impresion_plotter() {
 }
 
 // --- Tonos de SETUP (puedes ver ejemplos de los tonos en la carpeta 'doc/tonos error' del proyecto de github)
-// Tono SOS de error de lectura de acelerador. Si se produce error en lectura de acelerador, se emite el aviso y se bloquea el uso del mismo.
 // 1 tono - comienza inicialización
-// Tono nivel ZERO - solo suena si se ha activado el nivel zero o asistencia de arranque.
+// tono nivel zero - solo suena si se ha activado el novel zero o asistencia de arranque.
 // 3 tonos - termina inicialización
 // [1,2] tonos - confirma el modo seleccionado
 
@@ -558,7 +460,7 @@ void setup() {
   if (debug) {
     // Inicia serial:
     Serial.begin(19200);
-    Serial.println("Version Con/Sin Acelerador + Dac 1.5.9.11");  
+    Serial.println("Version Con/Sin Acelerador + Dac 1.5.9.15");  
     // Configura plotter
     Serial.println("8,-8,0,0,0,0");
   }
@@ -602,8 +504,9 @@ void setup() {
     // Activamos el nivel ZERO si el acelerador está activo
     if (modo_acelerador_activo){
       acelerador_nivel_zero_activo=true;
+      nivel = NIVEL_ZERO;
       nivel_minimo = NIVEL_ZERO;
-      ZERO_TONE();
+      ZERO_NTONE();
     }
   }
 
@@ -620,16 +523,17 @@ void setup() {
         // Modo 2, al pedalear aumenta velocidad y al parar pedales disminuye
         // Activar con mas de 4 toques de freno tras oir el pitido o encender la bici.
         modo_crucero = 2;
+        /*
         retardo_aceleracion = 6;
         retardo_paro_motor = 1.25;
         desacelera_al_parar_pedal = true;
         p_frenadas = 0;
+        */
         break;
       } else if (mdcont==0){
         v_crucero = niveles[nivel];// Fijamos el nivel seleccionado al encender la bici si aranca en modo 1
       }
     }
-    //repeatTones(tono_inicial, modo_crucero, 3000, 100, 150); // Tono verificacion inicialización de modo x
 
   // Ajusta contadores de tiempo de la configuracion 
   retardo_paro_motor = retardo_paro_motor * (1000 / tiempo_cadencia);
@@ -639,26 +543,35 @@ void setup() {
   // Anulamos el retardo por seguridad para que empiece progresivo al encender la bici
   contador_retardo_inicio_progresivo = retardo_inicio_progresivo;
 
-  //delay(300);
   repeatTones(tono_inicial, 3, 3000, 90, 90); // Tono de finalización de setup.
   delay(100);
   repeatTones(tono_inicial, modo_crucero, 2500, 90, 150); // Tono verificacion inicialización de modo x.
 }
 
+unsigned long tiempo_prev_loop = 0;
+
 // Bucle principal
-unsigned long lastTime = millis();
-unsigned long interval = 250; //ms
-
 void loop() {
-
-  pulsos = p_pulsos;
-  frenadas = p_frenadas;
   
-  if(millis() - lastTime >= interval){
+  if((unsigned long)(millis() - tiempo_prev_loop) > tiempo_cadencia){
+
+    tiempo_prev_loop = millis();
+
+    /*
+    // Con la medida del acelerador detectamos si hay que salir del nivel Zero
+    // Sale del nivel Zero si se está apretado el freno, no hay pedaladas, nos encontramos en nivel Zero y se ha detectado el corte repentino de acelerador.
+    if(digitalRead(pin_freno) == LOW && pulsos == 0 && nivel==NIVEL_ZERO && (v_aceleradorprev > v_acelerador &&  v_acelerador <= a0_min_value + 50.0 && v_aceleradorprev > a0_med_value - 50.0)){ 
+      nivel=nivel_por_defecto;
+      v_crucero = niveles[nivel];
+      repeatTones(tonos_cambia_nivel,1,1800,800,0);
+    } 
+    */
+  
+
     
-    p_pulsos = 0;
-    p_frenadas = 0;
-    
+    pulsos = p_pulsos;
+    frenadas = p_frenadas;
+
     // Si se pedalea despacio o se paran los pedales
     if (pulsos < cadencia) {
         contador_retardo_inicio_progresivo++;
@@ -666,27 +579,25 @@ void loop() {
         if (contador_retardo_paro_motor > retardo_paro_motor){
           para_motor();
         }
-    }
+    
   
     // Si se pedalea normal (por encima de la cadencia).
-    if (pulsos >= cadencia) {
+    } else if (pulsos >= cadencia) {
         if (contador_retardo_inicio_progresivo < retardo_inicio_progresivo && auto_progresivo){
           contador_retardo_aceleracion = bkp_contador_retardo_aceleracion;
-          auto_progresivo = false;
           cadencia=2;
-        } else { 
-          auto_progresivo = false;  
         }
+        auto_progresivo = false; 
         contador_retardo_inicio_progresivo = 0;
         contador_retardo_paro_motor = 0;
+  
         if (contador_retardo_aceleracion < retardo_aceleracion){
           contador_retardo_aceleracion++;
         }     
         motor = -5;
-    }
   
     // Si estan los pedales parados
-    if (pulsos == 0){
+    } else if (pulsos == 0){
       // Desacelera al parar los pedales
       if (contador_retardo_aceleracion > 0 && desacelera_al_parar_pedal){
         contador_retardo_aceleracion = contador_retardo_aceleracion - 2;
@@ -699,7 +610,7 @@ void loop() {
     // Si se ha pulsado el freno
     if (frenadas > 0) {  
       // Modo 1 sube nivel de asistencia con un toque y baja con 2 toques seguidos
-      if (modo_crucero == 1 && pulsos > 3 && contador_retardo_aceleracion != 0){
+      if (pulsos > 3 && contador_retardo_aceleracion != 0){
         cambia_nivel();
       // Salidas en cuesta 4 toques de freno consecutivos si estamos parados (el primero no suena)
       } else if (nivel_aceleracion == voltaje_minimo && contador_retardo_aceleracion == 0
@@ -712,7 +623,7 @@ void loop() {
         aviso = false;
       }
     }
-  
+
     // Aviso de final de progresivo, configurar arriba si no se desea
     if (tono_fin_progresivo){
       if (contador_retardo_aceleracion == retardo_aceleracion && !aviso) {
@@ -720,12 +631,14 @@ void loop() {
         aviso = true;
       }
     }
-        
+    
     if (debug) {impresion_plotter();}
-  
-    lastTime = millis(); 
+
+    p_pulsos = 0;
+    p_frenadas = 0;
+
   }
-
+  
   establece_voltaje();
-
+  
 }
